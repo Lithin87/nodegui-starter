@@ -2,37 +2,42 @@ const fs = require('fs');
 const jp = require('jsonpath');
 const xl = require('excel4node');
 const {XMLParser} = require('fast-xml-parser');
-const prompt = require("prompt-sync")({ sigint: true });
-
-const Main_Execute = () => {
-
 
 const REQ_PAYLOAD = "./Resources/RequestPayload.txt";
 const RES_PAYLOAD = "./Resources/ResponsePayload.txt";
 const EXTRACTED   = "./Resources/Extracted.txt";
 const EXCEL       = "./Resources/FinalApigeeExtractedDetails.xlsx";
 const TRACE       = "./Resources/TraceFiles";
-Array.of(REQ_PAYLOAD,RES_PAYLOAD,EXTRACTED,EXCEL).forEach(s => fs.rmSync(s, { force: true }))
 
-fs.readdirSync(TRACE).forEach(file => { parse_trace(`${TRACE}/${file}`)}) 
 
-function parse_trace(filename) {
-    const trace_json = JSON.parse(fs.readFileSync(filename));
+export const clear_files = () => { Array.of(REQ_PAYLOAD,RES_PAYLOAD,EXTRACTED,EXCEL).forEach(s => fs.rmSync(s, { force: true })) }
+
+export const Main_Execute = () => {
+
     
-    let req_msg = jp.query(trace_json, '$..results[?(@.ActionResult=="RequestMessage")].content');
-    let res_msg = jp.query(trace_json, '$..results[?(@.ActionResult=="ResponseMessage")].content');
+    fs.readdirSync(TRACE).forEach(file => { parse_trace(`${TRACE}/${file}`)}) 
     
-    new Set(req_msg).forEach(s => fs.writeFileSync(REQ_PAYLOAD, s + "\n", { flag: 'a+' }));
-    new Set(res_msg).forEach(s => fs.writeFileSync(RES_PAYLOAD, s + "\n", { flag: 'a+' }));
+    function parse_trace(filename) {
+        const trace_json = JSON.parse(fs.readFileSync(filename));
+        
+        let req_msg = jp.query(trace_json, '$..results[?(@.ActionResult=="RequestMessage")].content');
+        let res_msg = jp.query(trace_json, '$..results[?(@.ActionResult=="ResponseMessage")].content');
+        
+        new Set(req_msg).forEach(s => fs.writeFileSync(REQ_PAYLOAD, s + "\n", { flag: 'a+' }));
+        new Set(res_msg).forEach(s => fs.writeFileSync(RES_PAYLOAD, s + "\n", { flag: 'a+' }));
+    }
+    
 }
 
+
+export const Field_Extract = (fields) => {
+
+const headers = fields.split(",")
 const req_contents = fs.readFileSync(REQ_PAYLOAD).toString()
 
 // var fields = apiSessionId,qflowCustomerId,remoteId,time,status
 // date,articleNumber,conditionType,tableNumber,priceList
 
-const fields = prompt("Pls enter the fields to extract  : ");
-const headers = fields.split(",")
 
 let output = []
 if(!(req_contents.includes("<")))
@@ -69,5 +74,3 @@ lines.forEach((line, line_index) => line.split(",").forEach((element, field_inde
 wb.write(EXCEL);
 
 }
-
-export default Main_Execute;

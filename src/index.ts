@@ -1,65 +1,75 @@
-import { QMainWindow, QWidget, QLabel, FlexLayout, QPushButton, QIcon, QLineEdit } from '@nodegui/nodegui';
+import { QMainWindow, QWidget, QLabel, FlexLayout, QPushButton, QIcon, QLineEdit, QListView, QKeyEvent, Key } from '@nodegui/nodegui';
 import logo from '../assets/logox200.png';
 import mickey from '../assets/mickey.png';
-import Main_Execute from './ApigeeTool';
+import {Main_Execute ,clear_files, Field_Extract} from './ApigeeTool';
 
+let fields:string = '';
+ 
 
-// Main_Execute();
+clear_files();
+
+const exec_process = () => { Field_Extract(fields)};
+
 const win = new QMainWindow();
-win.setWindowTitle("Hello World");
-win.resize(700, 400);
+win.setWindowTitle("Apigee Trace Analysis Tool");
+win.resize(800, 800);
 
 const centralWidget = new QWidget();
+
+// const viewWidget1 = new QWidget();
+// const qboxLayout = new QBoxLayout(2);
+// viewWidget1.setLayout(qboxLayout);
+
 centralWidget.setObjectName("myroot");
 const rootLayout = new FlexLayout();
 centralWidget.setLayout(rootLayout);
-centralWidget.resize(200,299);
+centralWidget.resize(400,299);
 
 const label = new QLabel();
-label.setObjectName("mylabel");
-label.setText("Hello");
+label.setText('Pls press "Extract Request/Response" to aggregate Request/Response');
 
 const button = new QPushButton();
-button.setIcon(new QIcon(logo));
-button.setObjectName("button");
+button.setIcon(new QIcon(mickey));
+button.setText('Extract Request/Response')
 button.addEventListener('clicked', Main_Execute )
 
 
 const button1 = new QPushButton();
-button1.setIcon(new QIcon(mickey));
+button1.setIcon(new QIcon(logo));
+button1.setText('Extract Fields')
+button1.addEventListener('clicked', exec_process )
 
 
 const label2 = new QLabel();
-label2.setText("World");
+label2.setText('Pls press "Extract Fields"  to parse fields after inputting in  below textfield to create excel else let it remain blank');
 label2.setInlineStyle(`
-  color: red;
+  color: yellow;
 `);
 
 
 const myLineEdit = new QLineEdit();
-const { QListView } = require("@nodegui/nodegui");
+myLineEdit.setFixedWidth(200);
+myLineEdit.addEventListener('textChanged', e => fields = e );
 
-const listview = new QListView();
+
+const listview = new QLabel();
+const listview1 = new QLabel();
+const listview2 = new QLabel();
 
 
-// myLineEdit.addEventListener('KeyPress', (nativeEvent) => {
-//   const event = new QKeyEvent(nativeEvent);
-
-//   const key = event.key();
-//   if ([Key.Key_Escape, Key.Key_Enter, Key.Key_Return].includes(key)) {
-//     event.accept();
-//     myLineEdit.setEventProcessed(true);
-//   }
-// });
 
 rootLayout.addWidget(label);
 rootLayout.addWidget(button);
-rootLayout.addWidget(button1);
-rootLayout.addWidget(label2);
-
-rootLayout.addWidget(myLineEdit);
 rootLayout.addWidget(listview);
+rootLayout.addWidget(label2);
+rootLayout.addWidget(myLineEdit);
+rootLayout.addWidget(listview1);
+rootLayout.addWidget(button1);
 
+rootLayout.addWidget(listview2);
+// rootLayout.addWidget(viewWidget1);
+// qboxLayout.addWidget(myLineEdit);
+// qboxLayout.addWidget(listview);
 
 win.setCentralWidget(centralWidget);
 win.setStyleSheet(
@@ -68,17 +78,17 @@ win.setStyleSheet(
       background-color: #009688;
       height: '100%';
       align-items: 'center';
-      justify-content: 'center';
+      justify-content: 'start';
     }
     #mylabel {
-      font-size: 24px;
-      font-weight: bold;
-      padding: 10;
+      font-size: 20px;
+      font-weight: lighter;
+      padding: 40;
     }
     #button {
-      width: 170px;
-      height : 170px;
-      margin-bottom: 10px;
+      width: 90px;
+      height : 50px;
+      margin-bottom: 65px;
 
     }
   `
